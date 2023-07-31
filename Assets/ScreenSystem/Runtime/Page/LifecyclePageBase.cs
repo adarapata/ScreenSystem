@@ -10,8 +10,8 @@ namespace ScreenSystem.Page
 	{
 		private readonly UnityScreenNavigator.Runtime.Core.Page.Page _page;
 
-		private CancellationTokenSource _pageActiveCancellationTokenSource;
-		protected CancellationToken PageActiveToken => _pageActiveCancellationTokenSource.Token;
+		private CancellationTokenSource _pageExitCancellationTokenSource;
+		protected CancellationToken PageExitCancellationToken => _pageExitCancellationTokenSource.Token;
 		
 		private readonly CancellationTokenSource _disposeCancellationTokenSource;
 
@@ -33,6 +33,7 @@ namespace ScreenSystem.Page
 
 		public IEnumerator WillPushEnter()
 		{
+			EnableExitCancellationTokenSource(true);
 			var cts = BuildCancellationTokenSourceOnDispose();
 			yield return WillPushEnterAsync(cts.Token).ToCoroutine();
 			cts.Cancel();
@@ -42,12 +43,11 @@ namespace ScreenSystem.Page
 
 		public virtual void DidPushEnter()
 		{
-			EnableActiveTokenSource(true);
 		}
 
 		public IEnumerator WillPushExit()
 		{
-			EnableActiveTokenSource(false);
+			EnableExitCancellationTokenSource(false);
 			var cts = BuildCancellationTokenSourceOnDispose();
 			yield return WillPushExitAsync(cts.Token).ToCoroutine();
 			cts.Cancel();
@@ -59,6 +59,7 @@ namespace ScreenSystem.Page
 
 		public IEnumerator WillPopEnter()
 		{
+			EnableExitCancellationTokenSource(true);
 			var cts = BuildCancellationTokenSourceOnDispose();
 			yield return WillPopEnterAsync(cts.Token).ToCoroutine();
 			cts.Cancel();
@@ -68,12 +69,11 @@ namespace ScreenSystem.Page
 
 		public virtual void DidPopEnter()
 		{
-			EnableActiveTokenSource(true);
 		}
 
 		public IEnumerator WillPopExit()
 		{
-			EnableActiveTokenSource(false);
+			EnableExitCancellationTokenSource(false);
 			var cts = BuildCancellationTokenSourceOnDispose();
 			yield return WillPopExitAsync(cts.Token).ToCoroutine();
 			cts.Cancel();
@@ -99,19 +99,19 @@ namespace ScreenSystem.Page
 			_disposeCancellationTokenSource.Dispose();
 		}
 
-		private void EnableActiveTokenSource(bool enable)
+		private void EnableExitCancellationTokenSource(bool enable)
 		{
 			if (enable)
 			{
-				_pageActiveCancellationTokenSource = BuildCancellationTokenSourceOnDispose();
+				_pageExitCancellationTokenSource = BuildCancellationTokenSourceOnDispose();
 			}
 			else
 			{
-				_pageActiveCancellationTokenSource.Cancel();
+				_pageExitCancellationTokenSource.Cancel();
 			}
 		}
 
-		protected CancellationTokenSource BuildCancellationTokenSourceOnDispose()
+		private CancellationTokenSource BuildCancellationTokenSourceOnDispose()
 		{
 			return CancellationTokenSource.CreateLinkedTokenSource(_disposeCancellationTokenSource.Token);
 		}

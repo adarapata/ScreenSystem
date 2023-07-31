@@ -10,8 +10,8 @@ namespace ScreenSystem.Modal
 	{
 		private readonly UnityScreenNavigator.Runtime.Core.Modal.Modal _modal;
 
-		private CancellationTokenSource _activeCancellationTokenSource;
-		protected CancellationToken ActiveToken => _activeCancellationTokenSource.Token;
+		private CancellationTokenSource _exitCancellationTokenSource;
+		protected CancellationToken ExitCancellationToken => _exitCancellationTokenSource.Token;
 
 		protected readonly CancellationTokenSource _disposeCancellationTokenSource;
 
@@ -33,6 +33,7 @@ namespace ScreenSystem.Modal
 
 		public IEnumerator WillPushEnter()
 		{
+			EnableExitTokenSource(true);
 			var cts = BuildCancellationTokenSourceOnDispose();
 			yield return WillPushEnterAsync(cts.Token).ToCoroutine();
 			cts.Cancel();
@@ -42,12 +43,11 @@ namespace ScreenSystem.Modal
 
 		public virtual void DidPushEnter()
 		{
-			EnableActiveTokenSource(true);
 		}
 
 		public IEnumerator WillPushExit()
 		{
-			EnableActiveTokenSource(false);
+			EnableExitTokenSource(false);
 			yield return WillPushExitAsync().ToCoroutine();
 		}
 
@@ -57,6 +57,7 @@ namespace ScreenSystem.Modal
 
 		public IEnumerator WillPopEnter()
 		{
+			EnableExitTokenSource(true);
 			var cts = BuildCancellationTokenSourceOnDispose();
 			yield return WillPopEnterAsync(cts.Token).ToCoroutine();
 			cts.Cancel();
@@ -66,12 +67,11 @@ namespace ScreenSystem.Modal
 
 		public virtual void DidPopEnter()
 		{
-			EnableActiveTokenSource(true);
 		}
 
 		public IEnumerator WillPopExit()
 		{
-			EnableActiveTokenSource(false);
+			EnableExitTokenSource(false);
 			var cts = BuildCancellationTokenSourceOnDispose();
 			yield return WillPopExitAsync(cts.Token).ToCoroutine();
 			cts.Cancel();
@@ -97,15 +97,15 @@ namespace ScreenSystem.Modal
 			_disposeCancellationTokenSource.Dispose();
 		}
 
-		private void EnableActiveTokenSource(bool enable)
+		private void EnableExitTokenSource(bool enable)
 		{
 			if (enable)
 			{
-				_activeCancellationTokenSource = BuildCancellationTokenSourceOnDispose();
+				_exitCancellationTokenSource = BuildCancellationTokenSourceOnDispose();
 			}
 			else
 			{
-				_activeCancellationTokenSource.Cancel();
+				_exitCancellationTokenSource.Cancel();
 			}
 		}
 
