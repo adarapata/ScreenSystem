@@ -158,7 +158,7 @@ namespace ScreenSystem.Page
 				return;
 			}
 			var handle = _pageContainer.Pop(playAnimation);
-			await handle.Task.AsUniTask().WithCancellation(cancellationToken);
+			await handle.WithCancellation(cancellationToken);
 		}
 
 		public void Initialize()

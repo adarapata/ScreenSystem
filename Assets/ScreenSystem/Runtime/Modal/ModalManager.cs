@@ -51,7 +51,7 @@ namespace ScreenSystem.Modal
 					source.TrySetResult(pageInstance);
 				});
 
-				var modal = await source.Task.WithCancellation(cancellationToken);
+				var modal = await source.Task;
 				await modalTask.Task;
 				cancellationToken.ThrowIfCancellationRequested();
 				return modal;
@@ -151,7 +151,7 @@ namespace ScreenSystem.Modal
 			if (_modalContainer.Modals.Any())
 			{
 				var handle = _modalContainer.Pop(playAnimation);
-				await handle.Task.AsUniTask().WithCancellation(_cancellationTokenSource.Token);
+				await handle.WithCancellation(_cancellationTokenSource.Token);
 			}
 		}
 
