@@ -6,7 +6,7 @@ using VContainer;
 
 namespace ScreenSystem.Page
 {
-	public class PageEventPublisher : IDisposable
+	public class PageEventPublisher : IPageEventSubscriber, IDisposable
 	{
 		private readonly Channel<PagePushMessage> _pagePushChannel;
 		private readonly Channel<PagePopMessage> _pagePopChannel;
@@ -28,12 +28,10 @@ namespace ScreenSystem.Page
 			_pagePopChannel.Writer.TryWrite(new PagePopMessage(playAnimation));
 		}
 
-		// イベントが飛んでこないためPublishは削除した
-		public IUniTaskAsyncEnumerable<PagePushMessage> OnPagePushAsyncEnumerable()
+		IUniTaskAsyncEnumerable<PagePushMessage> IPageEventSubscriber.OnPagePushAsyncEnumerable()
 			=> _pagePushChannel.Reader.ReadAllAsync();
 
-		// Publishは削除した
-		public IUniTaskAsyncEnumerable<PagePopMessage> OnPagePopAsyncEnumerable()
+		IUniTaskAsyncEnumerable<PagePopMessage> IPageEventSubscriber.OnPagePopAsyncEnumerable()
 			=> _pagePopChannel.Reader.ReadAllAsync();
 
 		public void Dispose()

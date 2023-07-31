@@ -11,7 +11,10 @@ namespace ScreenSystem.VContainerExtension
             builder.Register<PageManager>(Lifetime.Singleton)
                 .AsImplementedInterfaces()
                 .WithParameter(pageContainer);
-            builder.Register<PageEventPublisher>(Lifetime.Singleton);
+
+            builder.Register<PageEventPublisher>(Lifetime.Singleton)
+                .AsSelf()
+                .AsImplementedInterfaces();
         }
     }
 }
