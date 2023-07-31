@@ -38,6 +38,11 @@ namespace ScreenSystem.Modal
 			{
 				var modalTask = modalContainer.Push(nameAttr.PrefabName, playAnimation: _playAnimation, onLoad: modal =>
 				{
+					if (cancellationToken.IsCancellationRequested)
+					{
+						source.TrySetCanceled(cancellationToken);
+						return;
+					}
 					var modalView = modal.modal as TModalView;
 					var lts = modalView.gameObject.GetComponentInChildren<LifetimeScope>();
 					SetUpParameter(lts);
@@ -48,6 +53,7 @@ namespace ScreenSystem.Modal
 
 				var modal = await source.Task.WithCancellation(cancellationToken);
 				await modalTask.Task;
+				cancellationToken.ThrowIfCancellationRequested();
 				return modal;
 			}
 		}

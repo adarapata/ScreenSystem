@@ -39,6 +39,11 @@ namespace ScreenSystem.Page
 			{
 				var pageTask = pageContainer.Push(nameAttr.PrefabName, playAnimation: _playAnimation, stack: _isStack, onLoad: result =>
 				{
+					if (cancellationToken.IsCancellationRequested)
+					{
+						source.TrySetCanceled(cancellationToken);
+						return;
+					}
 					var pageView = result.page as TPageView;
 					var lts = pageView.gameObject.GetComponentInChildren<LifetimeScope>();
 					SetUpParameter(lts);
@@ -47,7 +52,8 @@ namespace ScreenSystem.Page
 					source.TrySetResult(pageInstance);
 				});
 
-				var page = await source.Task.WithCancellation(cancellationToken);
+				var page = await source.Task;
+				cancellationToken.ThrowIfCancellationRequested();
 				await pageTask.Task;
 				return page;
 			}
