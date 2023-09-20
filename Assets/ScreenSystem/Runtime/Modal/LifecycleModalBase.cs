@@ -11,9 +11,11 @@ namespace ScreenSystem.Modal
 		private readonly UnityScreenNavigator.Runtime.Core.Modal.Modal _modal;
 
 		private CancellationTokenSource _exitCancellationTokenSource;
-		protected CancellationToken ExitCancellationToken => _exitCancellationTokenSource.Token;
+		public CancellationToken ExitCancellationToken => _exitCancellationTokenSource.Token;
 
 		protected readonly CancellationTokenSource _disposeCancellationTokenSource;
+		
+		public CancellationToken DisposeCancellationToken => _disposeCancellationTokenSource.Token;
 
 		protected LifecycleModalBase(UnityScreenNavigator.Runtime.Core.Modal.Modal modal)
 		{

@@ -11,9 +11,11 @@ namespace ScreenSystem.Page
 		private readonly UnityScreenNavigator.Runtime.Core.Page.Page _page;
 
 		private CancellationTokenSource _pageExitCancellationTokenSource;
-		protected CancellationToken PageExitCancellationToken => _pageExitCancellationTokenSource.Token;
+		public CancellationToken ExitCancellationToken => _pageExitCancellationTokenSource.Token;
 		
 		private readonly CancellationTokenSource _disposeCancellationTokenSource;
+		
+		public CancellationToken DisposeCancellationToken => _disposeCancellationTokenSource.Token;
 
 		protected LifecyclePageBase(UnityScreenNavigator.Runtime.Core.Page.Page page)
 		{
