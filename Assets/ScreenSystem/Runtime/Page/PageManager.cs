@@ -89,11 +89,15 @@ namespace ScreenSystem.Page
 		{
 			_pageEventSubscriber.OnPagePushAsyncEnumerable()
 				.ForEachAwaitAsync(message => Push(message.Builder, _cancellationTokenSource.Token).SuppressCancellationThrow(), 
-					_cancellationTokenSource.Token);
+					_cancellationTokenSource.Token)
+				.SuppressCancellationThrow()
+				.Forget();
 
 			_pageEventSubscriber.OnPagePopAsyncEnumerable()
 				.ForEachAwaitAsync(message => Pop(message.PlayAnimation, _cancellationTokenSource.Token).SuppressCancellationThrow(),
-					_cancellationTokenSource.Token);
+					_cancellationTokenSource.Token)
+				.SuppressCancellationThrow()
+				.Forget();
 		}
 
 		public void Dispose()
