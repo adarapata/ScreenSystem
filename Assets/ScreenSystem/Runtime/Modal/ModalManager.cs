@@ -51,7 +51,7 @@ namespace ScreenSystem.Modal
 			_lifetimeScope = lifetimeScope;
 		}
 
-		public async UniTask<IModal> Push(IModalBuilder builder, CancellationToken cancellationToken)
+		public async UniTask<TModal> Push<TModal>(IModalBuilder builder, CancellationToken cancellationToken) where TModal : class, IModal
 		{
 			if (ModalTransitionScope.IsModalTransition)
 			{
@@ -60,7 +60,7 @@ namespace ScreenSystem.Modal
 			
 			using var scope = ModalTransitionScope.Transition();	
 			var page = await builder.Build(_modalContainer, _lifetimeScope, cancellationToken);
-			return page;
+			return page as TModal;
 		}
 
 		public async UniTask Pop(bool playAnimation, CancellationToken cancellationToken)

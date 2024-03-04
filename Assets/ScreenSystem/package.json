@@ -1,6 +1,6 @@
 {
   "name": "jp.adarapata.screensystem",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "dependencies": {
     "com.cysharp.unitask": "https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask#2.1.0",
     "jp.hadashikick.vcontainer": "https://github.com/hadashiA/VContainer.git?path=VContainer/Assets/VContainer#1.13.2",
