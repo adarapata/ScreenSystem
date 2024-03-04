@@ -56,7 +56,7 @@ namespace ScreenSystem.Modal
 			return await Push(builder, cancellationToken) as TModal;
 		}
 		
-		public async UniTask<IModal> Push(IModalBuilder builder, CancellationToken cancellationToken) where TModal : class, IModal
+		public async UniTask<IModal> Push(IModalBuilder builder, CancellationToken cancellationToken)
 		{
 			if (ModalTransitionScope.IsModalTransition)
 			{
