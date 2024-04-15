@@ -10,7 +10,7 @@ namespace ScreenSystem.Modal
 	{
 		private readonly UnityScreenNavigator.Runtime.Core.Modal.Modal _modal;
 
-		private readonly UniTaskCompletionSource _closeCompletionSource = new();
+		private readonly UniTaskCompletionSource _completeCompletionSource = new();
 
 		private CancellationTokenSource _exitCancellationTokenSource;
 		public CancellationToken ExitCancellationToken => _exitCancellationTokenSource.Token;
@@ -118,14 +118,14 @@ namespace ScreenSystem.Modal
 			return CancellationTokenSource.CreateLinkedTokenSource(_disposeCancellationTokenSource.Token);
 		}
 
-		protected void Close()
+		protected void Complete()
 		{
-			_closeCompletionSource.TrySetResult();
+			_completeCompletionSource.TrySetResult();
 		}
 
-		public UniTask OnCloseAsync(CancellationToken cancellationToken)
+		public UniTask OnCompleteAsync(CancellationToken cancellationToken)
 		{
-			return _closeCompletionSource.Task.AttachExternalCancellation(cancellationToken);
+			return _completeCompletionSource.Task.AttachExternalCancellation(cancellationToken);
 		}
 
 		public string ModalId => _modal.Identifier;

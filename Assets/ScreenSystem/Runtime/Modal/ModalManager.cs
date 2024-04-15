@@ -81,7 +81,7 @@ namespace ScreenSystem.Modal
 				return;
 			}
 
-			if (await modal.OnCloseAsync(_cancellationTokenSource.Token)
+			if (await modal.OnCompleteAsync(_cancellationTokenSource.Token)
 				    .SuppressCancellationThrow())
 			{
 				return;

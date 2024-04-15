@@ -5,7 +5,7 @@ namespace ScreenSystem.Modal
 {
     public interface IModal
     {
-        UniTask OnCloseAsync(CancellationToken cancellationToken);
+        UniTask OnCompleteAsync(CancellationToken cancellationToken);
         
         string ModalId { get; }
     }
