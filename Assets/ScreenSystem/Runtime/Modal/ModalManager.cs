@@ -91,6 +91,16 @@ namespace ScreenSystem.Modal
 
 		public async UniTask Pop(bool playAnimation, CancellationToken cancellationToken)
 		{
+			await PopInternal(playAnimation, cancellationToken);
+		}
+
+		public async UniTask Pop(IModal modal, bool playAnimation, CancellationToken cancellationToken)
+		{
+			await PopInternal(playAnimation, cancellationToken, modal.ModalId);
+		}
+
+		private async UniTask PopInternal(bool playAnimation, CancellationToken cancellationToken, string modalId = null)
+		{
 			if (ModalTransitionScope.IsModalTransition)
 			{
 				await ModalTransitionScope.WaitTransition(cancellationToken);
@@ -99,7 +109,7 @@ namespace ScreenSystem.Modal
 			using var scope = ModalTransitionScope.Transition();
 			if (_modalContainer.Modals.Any())
 			{
-				var handle = _modalContainer.Pop(playAnimation);
+				var handle = string.IsNullOrEmpty(modalId) ? _modalContainer.Pop(playAnimation) : _modalContainer.Pop(playAnimation, modalId);
 				await handle.WithCancellation(cancellationToken);
 			}
 		}
