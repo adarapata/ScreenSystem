@@ -8,7 +8,7 @@ using VContainer.Unity;
 
 namespace ScreenSystem.Modal
 {
-	public class ModalManager
+	public class ModalManager : IDisposable
 	{
 		class ModalTransitionScope : IDisposable
 		{
@@ -41,7 +41,7 @@ namespace ScreenSystem.Modal
 		
 		private readonly ModalContainer _modalContainer;
 		private readonly LifetimeScope _lifetimeScope;
-		private IDisposable _disposable;
+		private readonly CancellationTokenSource _cancellationTokenSource = new();
 
 
 		[Inject]
@@ -67,6 +67,27 @@ namespace ScreenSystem.Modal
 			var page = await builder.Build(_modalContainer, _lifetimeScope, cancellationToken);
 			return page;
 		}
+		
+		public void PushAndForget(IModalBuilder builder)
+		{
+			PushAndForgetInternal(builder).Forget();
+		}
+
+		private async UniTaskVoid PushAndForgetInternal(IModalBuilder builder)
+		{
+			var (pushCanceled, modal) = await Push(builder, _cancellationTokenSource.Token).SuppressCancellationThrow();
+			if (pushCanceled)
+			{
+				return;
+			}
+
+			if (await modal.OnCloseAsync(_cancellationTokenSource.Token)
+				    .SuppressCancellationThrow())
+			{
+				return;
+			}
+			await Pop(true, _cancellationTokenSource.Token);
+		}
 
 		public async UniTask Pop(bool playAnimation, CancellationToken cancellationToken)
 		{
@@ -89,6 +110,12 @@ namespace ScreenSystem.Modal
 			{
 				await Pop(animation, cancellationToken);
 			}
+		}
+
+		public void Dispose()
+		{
+			_cancellationTokenSource.Cancel();
+			_cancellationTokenSource.Dispose();
 		}
 	}
 }
