@@ -125,7 +125,7 @@ namespace ScreenSystem.Modal
 
 		public UniTask OnCloseAsync(CancellationToken cancellationToken)
 		{
-			return _closeCompletionSource.Task.WithCancellation(cancellationToken);
+			return _closeCompletionSource.Task.AttachExternalCancellation(cancellationToken);
 		}
 
 		public string ModalId => _modal.Identifier;
