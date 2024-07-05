@@ -86,7 +86,8 @@ namespace ScreenSystem.Modal
 			{
 				return;
 			}
-			await Pop(true, _cancellationTokenSource.Token);
+
+			await Pop(modal, true, _cancellationTokenSource.Token);
 		}
 
 		public async UniTask Pop(bool playAnimation, CancellationToken cancellationToken)
