@@ -133,4 +133,12 @@ namespace ScreenSystem.Modal
 			_cancellationTokenSource.Dispose();
 		}
 	}
+
+	public static class ModalExtensions
+	{
+		public static UniTask Pop(this IModal modal, ModalManager modalManager, bool playAnimation, CancellationToken cancellationToken)
+		{
+			return modalManager.Pop(modal, playAnimation, cancellationToken);
+		}
+	}
 }
