@@ -94,9 +94,9 @@ namespace ScreenSystem.Modal
 			await PopInternal(playAnimation, cancellationToken);
 		}
 
-		public async UniTask Pop(IModal modal, bool playAnimation, CancellationToken cancellationToken)
+		public async UniTask Pop(IModal popModal, bool playAnimation, CancellationToken cancellationToken)
 		{
-			await PopInternal(playAnimation, cancellationToken, modal.ModalId);
+			await PopInternal(playAnimation, cancellationToken, popModal.ModalId);
 		}
 
 		private async UniTask PopInternal(bool playAnimation, CancellationToken cancellationToken, string modalId = null)
@@ -109,7 +109,12 @@ namespace ScreenSystem.Modal
 			using var scope = ModalTransitionScope.Transition();
 			if (_modalContainer.Modals.Any())
 			{
-				var handle = string.IsNullOrEmpty(modalId) ? _modalContainer.Pop(playAnimation) : _modalContainer.Pop(playAnimation, modalId);
+				if (!string.IsNullOrEmpty(modalId) && _modalContainer.OrderedModalIds.Contains(modalId))
+				{
+					await UniTask.WaitUntil(() => _modalContainer.OrderedModalIds.Last() == modalId, cancellationToken: cancellationToken);
+				}
+
+				var handle = _modalContainer.Pop(playAnimation);
 				await handle.WithCancellation(cancellationToken);
 			}
 		}
