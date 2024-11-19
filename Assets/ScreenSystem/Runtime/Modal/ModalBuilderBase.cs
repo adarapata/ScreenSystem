@@ -14,9 +14,11 @@ namespace ScreenSystem.Modal
         where TModalView : ModalViewBase
     {
         private readonly bool _playAnimation;
-        public ModalBuilderBase(bool playAnimation = true)
+        private readonly string _overridePrefabName;
+        public ModalBuilderBase(bool playAnimation = true, string overridePrefabName = null)
         {
             _playAnimation = playAnimation;
+            _overridePrefabName = overridePrefabName;
         }
 
         public async UniTask<IModal> Build(ModalContainer modalContainer, LifetimeScope parent, CancellationToken cancellationToken)
@@ -25,7 +27,8 @@ namespace ScreenSystem.Modal
             var source = new UniTaskCompletionSource<IModal>();
             using (LifetimeScope.EnqueueParent(parent))
             {
-                var modalTask = modalContainer.Push(nameAttr.PrefabName, playAnimation: _playAnimation, onLoad: modal =>
+                var prefabName = string.IsNullOrEmpty(_overridePrefabName) ? nameAttr.PrefabName : _overridePrefabName;
+                var modalTask = modalContainer.Push(prefabName, playAnimation: _playAnimation, onLoad: modal =>
                 {
                     if (cancellationToken.IsCancellationRequested)
                     {
@@ -58,7 +61,7 @@ namespace ScreenSystem.Modal
     {
         private readonly TParameter _parameter;
 
-        public ModalBuilderBase(TParameter parameter, bool playAnimation = true) : base(playAnimation)
+        public ModalBuilderBase(TParameter parameter, bool playAnimation = true, string overridePrefabName = null) : base(playAnimation, overridePrefabName)
         {
             _parameter = parameter;
         }

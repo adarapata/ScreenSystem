@@ -15,8 +15,9 @@ namespace ScreenSystem.Page
     {
         private readonly bool _playAnimation;
         private readonly bool _isStack;
+        private readonly string _overridePrefabName;
 
-        public PageBuilderBase(bool playAnimation = true, bool stack = true)
+        public PageBuilderBase(bool playAnimation = true, bool stack = true, string overridePrefabName = null)
         {
             _playAnimation = playAnimation;
             _isStack = stack;
@@ -28,7 +29,8 @@ namespace ScreenSystem.Page
             var source = new UniTaskCompletionSource<IPage>();
             using (LifetimeScope.EnqueueParent(parent))
             {
-                var pageTask = pageContainer.Push(nameAttr.PrefabName, playAnimation: _playAnimation, stack: _isStack, onLoad: result =>
+                var prefabName = string.IsNullOrEmpty(_overridePrefabName) ? nameAttr.PrefabName : _overridePrefabName;
+                var pageTask = pageContainer.Push(prefabName, playAnimation: _playAnimation, stack: _isStack, onLoad: result =>
                 {
                     if (cancellationToken.IsCancellationRequested)
                     {
@@ -62,7 +64,7 @@ namespace ScreenSystem.Page
     {
         private readonly TParameter _parameter;
 		
-        public PageBuilderBase(TParameter parameter, bool playAnimation = true, bool stack = true) : base(playAnimation, stack)
+        public PageBuilderBase(TParameter parameter, bool playAnimation = true, bool stack = true, string overridePrefabName = null) : base(playAnimation, stack, overridePrefabName)
         {
             _parameter = parameter;
         }
