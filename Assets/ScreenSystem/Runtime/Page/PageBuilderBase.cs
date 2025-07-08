@@ -21,6 +21,7 @@ namespace ScreenSystem.Page
         {
             _playAnimation = playAnimation;
             _isStack = stack;
+            _overridePrefabName = overridePrefabName;
         }
 
         public async UniTask<IPage> Build(PageContainer pageContainer, LifetimeScope parent, CancellationToken cancellationToken)
