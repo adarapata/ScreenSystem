@@ -25,9 +25,12 @@ namespace ScreenSystem.Modal
         {
             var nameAttr = Attribute.GetCustomAttribute(typeof(TModal), typeof(AssetNameAttribute)) as AssetNameAttribute;
             var source = new UniTaskCompletionSource<IModal>();
+            var prefabName = string.IsNullOrEmpty(_overridePrefabName) ? nameAttr.PrefabName : _overridePrefabName;
+            var loadHandler = ResolveScreenLoadHandler(parent);
+            var loadContext = new ScreenLoadContext(ScreenKind.Modal, typeof(TModal), prefabName);
+            loadHandler?.OnLoadStart(loadContext);
             using (LifetimeScope.EnqueueParent(parent))
             {
-                var prefabName = string.IsNullOrEmpty(_overridePrefabName) ? nameAttr.PrefabName : _overridePrefabName;
                 var modalTask = modalContainer.Push(prefabName, playAnimation: _playAnimation, onLoad: modal =>
                 {
                     if (cancellationToken.IsCancellationRequested)
@@ -41,17 +44,31 @@ namespace ScreenSystem.Modal
                     lts.Build();
                     var pageInstance = lts.Container.Resolve<TModal>();
                     source.TrySetResult(pageInstance);
+                    loadHandler?.OnPrefabLoaded(loadContext);
                 });
 
                 var modal = await source.Task;
                 await modalTask.Task;
                 cancellationToken.ThrowIfCancellationRequested();
+                loadHandler?.OnLoadComplete(loadContext);
                 return modal;
             }
         }
 
         protected virtual void SetUpParameter(LifetimeScope lifetimeScope)
         {
+        }
+
+        private static IScreenLoadHandler ResolveScreenLoadHandler(LifetimeScope parent)
+        {
+            try
+            {
+                return parent.Container.Resolve<IScreenLoadHandler>();
+            }
+            catch (VContainerException)
+            {
+                return null;
+            }
         }
     }
 
