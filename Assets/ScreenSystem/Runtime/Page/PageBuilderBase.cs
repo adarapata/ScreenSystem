@@ -28,9 +28,12 @@ namespace ScreenSystem.Page
         {
             var nameAttr = Attribute.GetCustomAttribute(typeof(TPage), typeof(AssetNameAttribute)) as AssetNameAttribute;
             var source = new UniTaskCompletionSource<IPage>();
+            var prefabName = string.IsNullOrEmpty(_overridePrefabName) ? nameAttr.PrefabName : _overridePrefabName;
+            var loadHandler = ResolveScreenLoadHandler(parent);
+            var loadContext = new ScreenLoadContext(ScreenKind.Page, typeof(TPage), prefabName);
+            loadHandler?.OnLoadStart(loadContext);
             using (LifetimeScope.EnqueueParent(parent))
             {
-                var prefabName = string.IsNullOrEmpty(_overridePrefabName) ? nameAttr.PrefabName : _overridePrefabName;
                 var pageTask = pageContainer.Push(prefabName, playAnimation: _playAnimation, stack: _isStack, onLoad: result =>
                 {
                     if (cancellationToken.IsCancellationRequested)
@@ -45,11 +48,13 @@ namespace ScreenSystem.Page
                     lts.Build();
                     var pageInstance = lts.Container.Resolve<TPage>();
                     source.TrySetResult(pageInstance);
+                    loadHandler?.OnPrefabLoaded(loadContext);
                 });
 
                 var page = await source.Task;
                 cancellationToken.ThrowIfCancellationRequested();
                 await pageTask.Task;
+                loadHandler?.OnLoadComplete(loadContext);
                 return page;
             }
         }
@@ -57,8 +62,20 @@ namespace ScreenSystem.Page
         protected virtual void SetUpParameter(LifetimeScope lifetimeScope)
         {
         }
+
+        private static IScreenLoadHandler ResolveScreenLoadHandler(LifetimeScope parent)
+        {
+            try
+            {
+                return parent.Container.Resolve<IScreenLoadHandler>();
+            }
+            catch (VContainerException)
+            {
+                return null;
+            }
+        }
     }
-    
+
     public abstract class PageBuilderBase<TPage, TPageView, TParameter> : PageBuilderBase<TPage, TPageView>
         where TPage : IPage
         where TPageView : PageViewBase
