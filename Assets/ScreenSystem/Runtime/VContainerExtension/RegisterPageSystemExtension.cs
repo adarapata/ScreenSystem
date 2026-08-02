@@ -9,6 +9,7 @@ namespace ScreenSystem.VContainerExtension
         public static void RegisterPageSystem(this IContainerBuilder builder, PageContainer pageContainer)
         {
             builder.Register<PageManager>(Lifetime.Singleton)
+                .AsSelf()
                 .AsImplementedInterfaces()
                 .WithParameter(pageContainer);
 
