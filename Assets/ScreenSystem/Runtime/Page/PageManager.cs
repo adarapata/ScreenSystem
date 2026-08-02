@@ -8,43 +8,14 @@ using VContainer.Unity;
 
 namespace ScreenSystem.Page
 {
-	public class PageManager : IInitializable, IDisposable
+	public class PageManager : IPageNavigator, IInitializable, IDisposable
 	{
-		class PageTransitionScope : IDisposable
-		{
-			public static bool IsPageTransition
-			{
-				get;
-				private set;
-			}
+		private static readonly PageTransitionGate TransitionGate = new PageTransitionGate();
 
-			public static IDisposable Transition()
-			{
-				return new PageTransitionScope();
-			}
-
-			private PageTransitionScope()
-			{
-				IsPageTransition = true;
-			}
-
-			public void Dispose()
-			{
-				IsPageTransition = false;
-			}
-			
-			public static UniTask WaitTransition(CancellationToken token)
-			{
-				return UniTask.WaitUntil(() => !IsPageTransition, cancellationToken: token);
-			}
-		}
-		
 		private readonly PageContainer _pageContainer;
 		private readonly LifetimeScope _lifetimeScope;
 		private readonly CancellationTokenSource _cancellationTokenSource;
 		private readonly IPageEventSubscriber _pageEventSubscriber;
-		private IDisposable _disposable;
-
 
 		[Inject]
 		public PageManager(PageContainer pageContainer, 
@@ -57,26 +28,16 @@ namespace ScreenSystem.Page
 			_cancellationTokenSource = new CancellationTokenSource();
 		}
 
-		private async UniTask<IPage> Push(IPageBuilder builder, CancellationToken cancellationToken)
+		public async UniTask<IPage> Push(IPageBuilder builder, CancellationToken cancellationToken)
 		{
-			if (PageTransitionScope.IsPageTransition)
-			{
-				await PageTransitionScope.WaitTransition(cancellationToken);
-			}
-			
-			using var scope = PageTransitionScope.Transition();	
+			using var scope = await TransitionGate.AcquireAsync(cancellationToken);
 			var page = await builder.Build(_pageContainer, _lifetimeScope, cancellationToken);
 			return page;
 		}
 
-		private async UniTask Pop(bool playAnimation, CancellationToken cancellationToken)
+		public async UniTask Pop(bool playAnimation, CancellationToken cancellationToken)
 		{
-			if (PageTransitionScope.IsPageTransition)
-			{
-				await PageTransitionScope.WaitTransition(cancellationToken);
-			}
-			
-			using var scope = PageTransitionScope.Transition();
+			using var scope = await TransitionGate.AcquireAsync(cancellationToken);
 			if (_pageContainer.Pages.Count < 1)
 			{
 				return;
@@ -102,7 +63,8 @@ namespace ScreenSystem.Page
 
 		public void Dispose()
 		{
-			_cancellationTokenSource?.Cancel();
+			_cancellationTokenSource.Cancel();
+			_cancellationTokenSource.Dispose();
 		}
 	}
 }
