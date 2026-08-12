@@ -27,5 +27,13 @@ namespace ScreenSystem
         void OnLoadStart(in ScreenLoadContext context);
         void OnPrefabLoaded(in ScreenLoadContext context);
         void OnLoadComplete(in ScreenLoadContext context);
+
+        /// <summary>
+        /// prefab のロードや遷移コルーチンが例外で終了したときに呼ばれる。
+        /// 既存実装の後方互換のため default 実装を持つ。
+        /// </summary>
+        void OnLoadFailed(in ScreenLoadContext context, Exception exception)
+        {
+        }
     }
 }

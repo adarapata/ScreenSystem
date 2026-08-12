@@ -47,6 +47,28 @@ namespace ScreenSystem.Modal
                     loadHandler?.OnPrefabLoaded(loadContext);
                 });
 
+                // ロード失敗時は onLoad が呼ばれず source が完了しないため、
+                // 失敗を source へ伝播して await を解き、呼び出し元へ例外を返す。
+                void HandleLoadError()
+                {
+                    if (!modalTask.HasError)
+                    {
+                        return;
+                    }
+
+                    _ = modalTask.Task.Exception;
+                    if (source.TrySetException(modalTask.Exception))
+                    {
+                        loadHandler?.OnLoadFailed(loadContext, modalTask.Exception);
+                    }
+                }
+
+                modalTask.OnTerminate += HandleLoadError;
+                if (modalTask.IsTerminated)
+                {
+                    HandleLoadError();
+                }
+
                 var modal = await source.Task;
                 await modalTask.Task;
                 cancellationToken.ThrowIfCancellationRequested();
