@@ -51,6 +51,28 @@ namespace ScreenSystem.Page
                     loadHandler?.OnPrefabLoaded(loadContext);
                 });
 
+                // ロード失敗時は onLoad が呼ばれず source が完了しないため、
+                // 失敗を source へ伝播して await を解き、TransitionGate を解放させる。
+                void HandleLoadError()
+                {
+                    if (!pageTask.HasError)
+                    {
+                        return;
+                    }
+
+                    _ = pageTask.Task.Exception;
+                    if (source.TrySetException(pageTask.Exception))
+                    {
+                        loadHandler?.OnLoadFailed(loadContext, pageTask.Exception);
+                    }
+                }
+
+                pageTask.OnTerminate += HandleLoadError;
+                if (pageTask.IsTerminated)
+                {
+                    HandleLoadError();
+                }
+
                 var page = await source.Task;
                 cancellationToken.ThrowIfCancellationRequested();
                 await pageTask.Task;
